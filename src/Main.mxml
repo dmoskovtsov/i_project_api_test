@@ -1,0 +1,137 @@
+<?xml version="1.0"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
+               xmlns:mx="library://ns.adobe.com/flex/mx"
+               xmlns:s="library://ns.adobe.com/flex/spark">
+    <fx:Script>
+        <![CDATA[
+        import flashx.undo.UndoManager;
+
+        import mx.graphics.ImageSnapshot;
+        import mx.graphics.codec.JPEGEncoder;
+
+
+        protected var _file_ref:FileReference;
+        protected var imageLoader:Loader;
+
+        public function addImage(e:MouseEvent):void
+        {
+            _file_ref = new FileReference();
+            _file_ref.addEventListener(Event.SELECT, handleFileSelect, false, 0, true);
+            var filter:FileFilter = new FileFilter("Images", "*.jpg;*.gif;*.png");
+            _file_ref.browse([filter]);
+        }
+
+        private function handleFileSelect(e:Event):void
+        {
+            _file_ref.removeEventListener(Event.SELECT, handleFileSelect);
+            _file_ref.addEventListener(Event.COMPLETE, handleFileOpen, false, 0, true);
+            _file_ref.load();
+        }
+
+        private function handleFileOpen(e:Event):void
+        {
+            _file_ref.removeEventListener(Event.COMPLETE, handleFileOpen);
+            var data:ByteArray = _file_ref.data as ByteArray;
+            imageLoader = new Loader();
+            imageLoader.loadBytes(data);
+            imageLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, imageLoadComplete, false, 0, true);
+        }
+
+        protected function imageLoadComplete(e:Event):void
+        {
+            imageLoader.contentLoaderInfo.removeEventListener(Event.COMPLETE, imageLoadComplete);
+            image1.source = imageLoader.content;
+            loadRandomImages()
+        }
+
+        private function loadRandomImages():void
+        {
+            loadImageFromInstagram('http://distilleryimage10.instagram.com/09ff90becb8f11e1a94522000a1e8aaf_7.jpg', image2)
+            loadImageFromInstagram('http://distilleryimage10.instagram.com/09ff90becb8f11e1a94522000a1e8aaf_7.jpg', image3)
+            loadImageFromInstagram('http://distilleryimage10.instagram.com/09ff90becb8f11e1a94522000a1e8aaf_7.jpg', image4)
+
+        }
+
+        private function saveImageToFileSystem():void
+        {
+            var jPEGEncoder:JPEGEncoder = new JPEGEncoder(500);
+            var imageSnapshot:ImageSnapshot = ImageSnapshot.captureImage(imageGroup, 0, jPEGEncoder);
+            var fileReference:FileReference = new FileReference();
+            fileReference.save(imageSnapshot.data, "hello_world.jpg");
+        }
+
+
+        public function loadImageFromInstagram(url:String, image:Image):void
+        {
+            image.source = url;
+        }
+        ]]>
+    </fx:Script>
+
+    <s:Rect height="612"
+            width="612"
+            includeInLayout="false">
+        <s:fill>
+            <s:SolidColor color="#bfcd12"/>
+        </s:fill>
+    </s:Rect>
+
+    <s:Group id="imageGroup"
+             width="612"
+             height="612">
+
+
+        <s:Image id="image1"
+                 smoothingQuality="high"
+                 smooth="true"
+                 x="0"
+                 y="0"
+                 width="300"
+                 height="306"
+                />
+
+        <s:Image id="image2"
+                 smoothingQuality="high"
+                 smooth="true"
+                 x="306"
+                 y="0"
+                 width="306"
+                 height="306"
+                />
+
+        <s:Image id="image3"
+                 smoothingQuality="high"
+                 smooth="true"
+                 x="0"
+                 y="306"
+                 width="306"
+                 height="306"
+                />
+
+        <s:Image id="image4"
+                 smoothingQuality="high"
+                 smooth="true"
+                 x="306"
+                 y="306"
+                 width="306"
+                 height="306"
+                />
+
+    </s:Group>
+
+    <s:Button label="add image"
+              click="addImage(event);"
+              x="100"
+              y="20"/>
+
+    <s:Button label="save image"
+              click="saveImageToFileSystem();"
+              x="170"
+              y="20"/>
+
+    <s:Button label="publish to instagram"
+              click="saveImageToFileSystem();"
+              x="300"
+              y="20"/>
+
+</s:Application>
